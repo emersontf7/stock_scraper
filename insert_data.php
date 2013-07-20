@@ -6,7 +6,6 @@ if (isset($_POST['values']) && isset($_POST['headers']))
    $value_arr = $_POST['values'];
    $query_tool = new QueryTool();
    $query = $query_tool->makeInsertQuery($header_arr, $value_arr);
-   print($query);
    $link = mysql_connect('localhost', 'root', 'root');
    if (!$link)
    {

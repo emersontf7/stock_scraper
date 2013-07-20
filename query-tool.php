@@ -10,20 +10,29 @@ Class QueryTool
    {
       $col_names = "";
       $col_values = "";
+      $temp_header_arr = array();
       for($i = 0; $i < count($header_arr); $i++)
       {
          $header = $header_arr[$i];
          $value = $value_arr[$i];
          $special_case_arr = $this->checkSpecialCases($header, $value);
          $temp_header = $this->replaceCharacters($special_case_arr[0]);
-         $temp_value = $this->translateToNum($special_case_arr[1]);
-         if($i > 0)
+         if($temp_header != "company")
+            $temp_value = $this->translateToNum($special_case_arr[1]);
+         else
+            $temp_value = $value;
+         
+         if (in_array($temp_value, $temp_header_arr) === false)
          {
-            $col_names .= ", ";
-            $col_values.= ", ";  
+            if ($i > 0)
+            {
+               $col_names .= ", ";
+               $col_values.= ", ";  
+            }
+            $temp_header_arr[] = $temp_header;
+            $col_names .= $temp_header . "";
+            $col_values .= "'" . $temp_value . "'";
          }
-         $col_names .= $temp_header . "";
-         $col_values .= "'" . $temp_value . "'";
       }
       $query = "INSERT INTO stocks ($col_names) VALUES ($col_values)";
       return $query;

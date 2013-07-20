@@ -1,19 +1,21 @@
-<? 
+<?
+require ("htmlpurifier-4.5.0/library/HTMLPurifier.auto.php");
+
 Class ScraperTool
 {
-   public $url;
-   private $contents;
+   public $purifier;
+   
    public function __construct()
    {
+      $this->purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
    }
-   public function getFileContents()
+
+   public function scrape($url)
    {
-      $this->contents = file_get_contents($url);
-      return $this->contents;
+      $contents = file_get_contents($url);
+      $clean_html = $this->purifier->purify($contents);
+      return $clean_html;
    }
-   public function getNextUrl()
-   {
-      
-   }
+
 }
 ?>
