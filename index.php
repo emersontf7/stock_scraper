@@ -4,14 +4,11 @@
       <script type='text/javascript' src='jquery/jquery-1.9.1.min.js'></script>
    </head>
    <body>
-      <form method="post" action="">
-         <input type='submit' name='scrape' value='Scrape'>
-      </form>
-
+      <a href='index.php?start=1'>Scrape</a>
       <?
       require ("scraper-tool.php");
       
-      if (isset($_GET['start']) && $_GET['start'] < 2072)
+      if (isset($_GET['start']))
       {
          $link = mysql_connect('localhost', 'root', 'root');
          if (!$link)
@@ -22,9 +19,15 @@
          if (!$db_link)
             die("Cannot use database " . mysql_error());
          
+         $result = mysql_query("SELECT COUNT(*) FROM companies AS count");
+         $row = mysql_fetch_row($result);
+
          $start = $_GET['start'];
-         $end = ($start < 2060) ? $start + 5: 2072;
+         if ($start >= $row[0])
+            die("Finished Scraping");
          
+         $end = ($start < $row[0] - 6) ? $start + 5: $row[0];
+
          $result = mysql_query("SELECT * FROM companies WHERE company_id >= $start && company_id < $end");
    
          $url_arr = array();
@@ -33,6 +36,9 @@
          
          while ($row = mysql_fetch_array($result))
          {
+            $res = mysql_query("DELETE FROM stocks WHERE company = '" . $row['company_key'] . "'");
+            if (!$res)
+               die("FAILED TO DELETE ENTRY " . mysql_error());
             $temp = "http://finance.yahoo.com/q/ks?s=" . $row['company_key'] . "+Key+Statistics";
             $page_arr[] = $scraper_tool->scrape($temp);
             $company_arr[] = $row['company_key'];
@@ -43,7 +49,7 @@
       }
       else
       {
-         die();
+         die("Failed to recieve values for start");
       }
       ?>
       <script type="text/javascript">
@@ -101,31 +107,6 @@
             window.location = "http://localhost/Stock_Scraper/index.php?start=" + start;
          }, 1000);
          
-         /*
-         for (var i = 0; i < url_arr.length; i++)
-         {
-            $.ajax(
-            {
-               type : "POST",
-               url : "/Stock_Scraper/scrape.php",
-               async: false,
-               data :
-               {
-                  url : url_arr[i]
-               },
-               success : function(msg)
-               {
-                  var company = url_arr[i].substring(32, url_arr[i].indexOf("+"));
-                  console.log(company);
-                  return scrapePage(msg, company);
-               },
-               error : function(error_obj)
-               {
-                  console.log(error_obj);
-               }
-            });
-         }
-         */
       </script>
    </body>
 </html>

@@ -5,8 +5,7 @@ Class QueryTool
    {
       date_default_timezone_set("UTC");
    }
-   
-   public function makeInsertQuery($header_arr, $value_arr)
+   public function buildQuery($header_arr, $value_arr)
    {
       $col_names = "";
       $col_values = "";
@@ -48,11 +47,10 @@ Class QueryTool
       }
       else if(preg_match("/Last Split Factor/", $header))
       {
-         $value = str_replace(":", "/", $header);
+         $value = str_replace(":", "/", $value);
       }
       else if(strtolower($header) == "float:")
       {
-         error_log("float_val");
          $header = "float_val";
       }
       else if(strtolower($header) == "trailing annual dividend yield:" && strpos($value, "%") > 0)
@@ -86,8 +84,11 @@ Class QueryTool
    
    public function translateToNum($value)
    {
-      if(strpos("/", $value) != FALSE)
+      if(strpos($value, "/") != FALSE)
+      {
+         error_log("SHOUD BE SPLIT HERE: " . $value);
          return $value;
+      }
       $matches = explode("-", $value);
       if(count($matches) == 3)
          return $value;
@@ -95,7 +96,7 @@ Class QueryTool
          $value = floatval($value)*1000000000;
       if(stripos($value, "M"))
          $value = floatval($value)*1000000;
-      if(strpos("/%/", $value))
+      if(strpos($value, "/%/"))
       {
          $value = str_replace("%", "", $value);
          $value = floatval($value)/100;
